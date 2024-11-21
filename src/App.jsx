@@ -1,51 +1,61 @@
 import React, { useState } from "react";
 
 function App() {
-  const testUrl =
-    "https://script.google.com/macros/s/AKfycbyCHa1Yn-iyQRZNwnmtbAytsCKbJvrwmMDS76AXUk1nwlXFs_DhJnuCEyLZV-o-n6-a1A/exec"; // Тестовый API
+  const apiUrl =
+    "https://script.google.com/macros/s/AKfycbwjzeVlOpXHnI2V0ctQr_-VAhpNDgZXxPcinv7yQ7OWptn0RKQlNMFKVtYy-sf7azw2Nw/exec";
 
-  const [status, setStatus] = useState(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginStatus, setLoginStatus] = useState(null);
 
-  const handleButton = async () => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
     try {
-      const response = await fetch(testUrl);
-      const data = await response.json();
-      setStatus(data[0].status);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-  const handleAddRow = async () => {
-    try {
-      const response = await fetch(testUrl, {
+      const response = await fetch(apiUrl, {
         method: "POST",
-        mode: "no-cors",
-        cache: "no-cache",
-        // credentials: "omit",
         headers: {
           "Content-Type": "application/json",
         },
-        redirect: "follow",
-        // referrerPolicy: "no-referrer",
-        body: JSON.stringify({ name: "Olivia" }),
+        body: JSON.stringify({ email, password }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
       const data = await response.json();
-      setStatus(data[0].status);
+      setLoginStatus(data.message);
     } catch (error) {
-      console.log(error);
+      console.error("Error during login:", error);
+      setLoginStatus("An error occurred. Please try again.");
     }
   };
 
   return (
-    <div>
-      <button type="button" onClick={handleButton}>
-        FetchData
-      </button>
-      {status && <p>Result: {status}</p>}
-
-      <button type="button" onClick={handleAddRow}>
-        Add row
-      </button>
+    <div style={{ margin: "50px" }}>
+      <h1>Login</h1>
+      <form onSubmit={handleLogin}>
+        <div>
+          <label>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
+        <div>
+          <label>Password:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+        <button type="submit">Login</button>
+      </form>
+      {loginStatus && <p>{loginStatus}</p>}
     </div>
   );
 }
